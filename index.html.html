@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Report Upsell CRM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#1b2333;--mu:#6b7690;--bd:#e3e8f2;--pr:#4f46e5;--ok:#16a34a;--no:#dc2626;--okb:#dcfce7;--nob:#fee2e2;--hd:#eef1f9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--card:#192032;--tx:#e8ecf6;--mu:#93a0bd;--bd:#2a3350;--pr:#818cf8;--okb:#12351f;--nob:#3b1717;--hd:#202944}}
+:root[data-theme="dark"]{--bg:#0f1420;--card:#192032;--tx:#e8ecf6;--mu:#93a0bd;--bd:#2a3350;--pr:#818cf8;--okb:#12351f;--nob:#3b1717;--hd:#202944}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif;font-size:15px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font-size:20px;margin:0}
+.sub{color:var(--mu);font-size:13px}
+.tabs{display:flex;gap:6px}
+button,select,input{font:inherit;color:var(--tx)}
+.tab,.btn{border:1px solid var(--bd);background:var(--card);padding:8px 14px;border-radius:10px;cursor:pointer}
+.tab.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.btn.pr{background:var(--pr);color:#fff;border-color:var(--pr)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.bar select,.bar input{border:1px solid var(--bd);background:var(--card);padding:8px 10px;border-radius:10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.k{color:var(--mu);font-size:13px}.v{font-size:26px;font-weight:700;margin-top:4px}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+h2{font-size:16px;margin:0 0 10px}
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{padding:8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+th{background:var(--hd);font-size:13px;color:var(--mu);position:sticky;top:0}
+td.r,th.r{text-align:right}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.pb{height:8px;background:var(--hd);border-radius:6px;min-width:90px;overflow:hidden}
+.pb i{display:block;height:100%;border-radius:6px}
+.ag{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd)}
+.tbl{max-height:70vh;overflow:auto;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+.tbl input,.tbl select{border:1px solid transparent;background:transparent;padding:6px;border-radius:8px;width:100%}
+.tbl input:focus,.tbl select:focus{border-color:var(--pr);background:var(--card);outline:none}
+.tbl td{padding:3px 4px}
+.u1{background:var(--okb)}.u0{background:var(--nob)}
+.x{border:0;background:none;color:var(--no);cursor:pointer;font-size:18px}
+.note{color:var(--mu);font-size:12px;margin-top:10px}
+.hide{display:none}
+.tg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tc{border:1px solid var(--bd);border-radius:14px;overflow:hidden;background:var(--card)}
+.th{color:#fff;font-weight:700;padding:9px 12px}
+.tb{padding:12px}.big{font-size:30px;font-weight:800}.big small{font-size:14px;color:var(--mu);font-weight:500}
+.tb .pb{margin:8px 0}
+.lg{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:13px}
+.ct{width:100%;height:auto}
+.mb{margin-bottom:12px}
+.th{display:flex;justify-content:space-between;align-items:center}
+.hx{background:rgba(255,255,255,.28);border:0;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;line-height:1}
+#hs{color:var(--pr)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>📈 Report Upsell CRM</h1><div class="sub">แดชบอร์ดสรุปผลการอัพเซล · คะแนน = จำนวนออเดอร์ที่แอดมิน "พูด" อัพเซล</div></div>
+  <div class="tabs"><button class="tab on" data-t="dash">แดชบอร์ด</button><button class="tab" data-t="ord">ออเดอร์ (แก้ไขได้)</button></div>
+</header>
+<div class="bar">
+  <select id="fd"></select>
+  <select id="ft"></select>
+  <input id="fq" placeholder="ค้นหาชื่อ / รหัส / ตัวแทน" style="flex:1;min-width:160px">
+</div>
+
+<section id="dash">
+  <div class="kpis" id="kpis"></div>
+  <div class="card mb"><h2>🏆 คะแนนแต่ละทีม <small id="hv" class="sub"></small></h2><div class="tg" id="tg"></div></div>
+  <div class="card mb"><h2>📊 กราฟแท่งคะแนนสะสมรายทีม <small class="sub">(ตามวันที่ ไม่ขึ้นกับตัวกรองวัน)</small></h2><div id="ch"></div><div class="lg" id="lg"></div></div>
+  <div class="grid">
+    <div class="card sc"><h2>ผลงานรายทีม</h2><table id="tt"></table></div>
+    <div class="card"><h2>ตัวแทนขายยอดสูงสุด</h2><div id="ag"></div></div>
+  </div>
+</section>
+
+<section id="ord" class="hide">
+  <div class="bar">
+    <button class="btn pr" id="add">+ เพิ่มออเดอร์</button>
+    <button class="btn pr" id="up">⬆ อัปโหลดไฟล์</button>
+    <input type="file" id="file" accept=".csv,.xlsx,.xls" class="hide">
+    <button class="btn" id="csv">⬇ ดาวน์โหลด CSV</button>
+    <button class="btn" id="rst">↺ คืนค่าเริ่มต้น</button>
+  </div>
+  <div class="tbl"><table id="ot"></table></div>
+  <div class="note">💡 เปลี่ยน "พูด/ไม่พูด" คะแนนจะตั้งเป็น 1/0 ให้อัตโนมัติ แล้วแก้คะแนนเองต่อได้ · อัปโหลด/ลากไฟล์ .xlsx .xls .csv มาวางได้ (รองรับไฟล์ที่ดาวน์โหลดจากชีตเดิม และไฟล์ CSV ที่ส่งออกจากหน้านี้ · ออเดอร์ที่รหัสซ้ำจะถูกข้าม) · แก้ไขได้ทุกช่อง ระบบบันทึกในเบราว์เซอร์นี้อัตโนมัติ และแดชบอร์ดอัปเดตทันที</div>
+</section>
+</div>
+
+<script>
+const TEAMS=["SUPER RICH","ลูกพระเจ้าตาก","มังกรทอง","Powerful Team","Khon Kaen"];
+const COL=["#f59e0b","#ef4444","#10b981","#6366f1","#06b6d4"];
+const G=[
+["2026-09-30",0,"112753|พระ สิทธิผล (อิงอรเบต้า)|iog|2590|0,110974|สุนทร แสงฉาย|tawan|1790|0,112654|Vilailak Sattayapun (เนเน่ เบต้า)|nene|2590|0,112461|สมปอง เตชะเสมสกุล|iog|2590|0,112745|คุณเล็ก เรืองศรี|kratai|1790|1,115211|รปภ. นนท์|whan|1790|1,111828|ปรีชาพล รอดงาม|mamm|2590|1,115101|คุณแอร์ (มะเหมี่ยว เบต้า)|yamon|2590|1,113011|ปวรพัฒน์ สุธรรมา|yamon|2490|1,115283|ไพจิตร พานิชย์|whan|1790|1"],
+["2026-09-30",1,"115318|สุรพล บุอ่อน|ooh|1790|0,115311|จำเนียน พำขุนทด|oddky|1790|0,115193|คุณเอกมล จันคำภา|ae|1790|0,113979|ต้น เดชาติวงค์|tta|2590|0,115516|สมบูรณ์ เซ่งง่าย|miww|3290|1,114590|เมธี ไชยสง|mai|4280|1,112874|อาทิตย์ กันทะวงค์|meple|4280|1,111730|Kanjana Suksiri|pui|5690|1,111174|นิพนธฺ สังวรสมาธิ|miww|5690|1,115115|ช่าง รชต|meple|3635|1"],
+["2026-09-30",2,"114387|ม่วย ประทุมรัตน์|giff|1790|0,112273|ร.ต.ท.เฉลียว สิบศิริ|pango|1790|0,115723|ธัญญพรรษ นาเมืองรักษ์|saii|10480|1,115217|ยุพิน สีพั้ว|wa|5690|1,115289|สังวาลย์ ยาเลิศ|ingon|9280|1,115085|นางไพจิตต์ สมใจมิตร|ingon|3680|1,111279|นกเล็ก พุ่มกลัด|yuij|3290|1,113214|กบ วราภรณ์|noina|2280|1,111386|ชื่อ สัมพันธ์|luknam|2280|1,114214|คุณสมคิด ปรัชญานาวิก|yuij|1790|1"],
+["2026-09-30",3,"114367|โอภาส สันเดช|bank|1790|0,113645|วิสุดา วรโยธา|kop|1790|0,113402|คุณปราณี นาคพันธุ์|plot|2590|0,114385|คุณ ณัฎฐณิชา บุญวัฒน์|anne|8635|1,113725|ช่างศรแม็กซิมั่ม โปรเจ็ค|ruk|3770|1,113683|พิตตินันท์ แก้วสถิตย์|mink|3290|1,115048|วราภรณ์ ดวงจันทร์|yuii|2770|1,114414|ทนายสิร์ปพัศ ภัทรฉมานันท์|anne|3290|1,114787|เพ็ญศรี กอมณี|hf0016_men|3290|1,115182|คุณประทีป จำนงค์|hf0016_men|5690|1"],
+["2026-09-30",4,"114194|ธวัชชัย กล้าหาญ|oils|1790|0,113814|คุณนคร|tumm|1790|0,113487|บังอร ตลิ่งไธสง|tee|1790|0,113800|อารี กลัดปิ่น|puy|3290|1,115142|กิตติกร โสนาง|tiww|3290|1,111280|ณัฐพนธ์ สีบุตรา|fon|3290|1,112664|กฤษณะ น้อยหลวงชัย|kungs|3290|1,114534|รุจี ศรีสุข|tiww|3290|1,114719|เกณฑ์พล คาวีวงศ์|evee|2590|1,114696|ศิรินภา สีโสภา|pap|2280|1"],
+["2026-09-29",0,"108166|อ้น สำรอง|kratai|2590|0,109391|สมหมาย โอนอ่อน|kratai|1790|0,110206|พรหมศร ชูทอง|whan|2280|0,107861|กิตติ ล่องแก้ว|tawan|1790|0,106838|พรทิพย์ ชุมทอง (อิงอรเบต้า)|iog|8290|1,109926|อภิวันทน์ จงรักษ์ลิขิต|nene|3290|1,107827|เรณู รัตนศิริพงษา|tawan|2280|1,109327|ชไมพร เหมปะระ|iog|1790|1,108233|ณรงค์|yamon|1790|1,108022|ปราณี ศรีโยนา|whan|1790|1"],
+["2026-09-29",1,"107974|ณิชากานต์ แผลงสูงเนิน|pui|1790|0,108929|แม่พร|oddky|1790|0,107467|คุณวิชัย ปุยศัทธา|meple|1790|0,110310|อรุณ ร่มพฤกษ์|ooh|1790|0,107364|ปัทมา แก้วแก้ว|phung|3290|1,109087|พงศภรณ์|tta|3290|1,110169|นายจตุพร บงบุตร|miww|3290|1,106741|คุณวี นาสนั่น|ting|1790|1,107453|คุณ จำเริญ ฉ่ำศรี|ae|2590|1,108465|ภัทรวดี บุญมี|pop|2280|1"],
+["2026-09-29",2,"109538|ฟองจันทร์ ยกคำชู|saii|2590|0,109580|ใบหม่อน แพงประดิษฐ์|pango|1790|0,110623|พาลี|saii|6680|1,106611|สมเกียรติ ยอดหาญ|wa|1790|1,108787|ฉัตรชัย ชัยชำนิ|ingon|3635|1,108109|จตุพร ศรีพร|ingon|3290|1"],
+["2026-09-29",3,"108278|พล|ruk|3290|0,109803|บัวทอง ต่อศิริ|plot|1790|0,107782|ลุงนิยม|kop|2590|0,110048|บุญยัง ศรีน้อย|yuii|3680|1,109528|บุญฤทธิ์ สิงห์ลอ|hf0016_men|3635|1,108332|เกรียงไกร ปั้นชูศรี|bank|3290|1,109713|Kจันทร์|mink|3290|1,107163|ประเมศวร์|anne|3290|1,107971|ต้นรัก สุโขทัย|hf0016_men|3290|1,107930|รุ่งนภา เทียนชัย|yuii|1790|1"],
+["2026-09-29",4,"107774|สมศรี บุญเกิด|tumm|3290|0,109978|อนุวัฒน์ สีหะวงค์|fon|1790|0"]
+];
+const KEY="crm_upsell_v1";
+function seed(){let id=0,r=[];G.forEach(([d,t,s])=>s.split(",").forEach(x=>{const p=x.split("|");r.push({id:++id,d,t:TEAMS[t],c:"SO202609-"+p[0],n:p[1],g:p[2].includes("_")?p[2]:"hf0015_"+p[2],a:+p[3],u:+p[4],s:+p[4],m:""})}));return r}
+let R;try{R=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!Array.isArray(R))R=seed();
+R.forEach(r=>{if(r.s==null)r.s=r.u;if(r.m==null)r.m=""});
+function syncTeams(){R.forEach(r=>{if(r.t&&!TEAMS.includes(r.t))TEAMS.push(r.t)})}
+syncTeams();
+let HID;try{HID=JSON.parse(localStorage.getItem("crm_hidden_v1"))}catch(e){}
+if(!Array.isArray(HID))HID=["อัพไซร้","ไม่อัพไซร้","ไลน์มาสั่ง"];
+const vis=r=>!HID.includes(r.t);
+function saveH(){try{localStorage.setItem("crm_hidden_v1",JSON.stringify(HID))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(R))}catch(e){}}
+const $=s=>document.querySelector(s),fmt=n=>Math.round(n).toLocaleString("th-TH");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dth=d=>{const[a,b,c]=d.split("-");return+c+"/"+ +b+"/"+a};
+
+function filters(){
+  const dates=[...new Set(R.map(r=>r.d))].sort().reverse();
+  const cd=$("#fd").value||"all",ct=$("#ft").value||"all";
+  $("#fd").innerHTML='<option value="all">ทุกวัน</option>'+dates.map(d=>`<option value="${d}">${dth(d)}</option>`).join("");
+  $("#ft").innerHTML='<option value="all">ทุกทีม</option>'+TEAMS.map(t=>`<option>${t}</option>`).join("");
+  $("#fd").value=dates.includes(cd)?cd:"all";$("#ft").value=ct;
+}
+function view(nd){const d=$("#fd").value,t=$("#ft").value,q=$("#fq").value.trim().toLowerCase();
+  return R.filter(r=>(nd||d=="all"||r.d==d)&&(t=="all"||r.t==t)&&(!q||(r.n+r.c+r.g).toLowerCase().includes(q)))}
+
+const sum=(x,k)=>x.reduce((a,r)=>a+(+r[k]||0),0);
+function dash(){
+  const V=view().filter(vis),n=V.length,sc=sum(V,"s"),u=V.filter(r=>r.u).length;
+  const K=[["จำนวนออเดอร์",fmt(n)],["ยอดขายรวม","฿"+fmt(sum(V,"a"))],["คะแนนรวม",`${fmt(sc)}/${n}`],["อัตราพูดอัพเซล",n?Math.round(u/n*100)+"%":"-"],["ยอดเฉลี่ย/ออเดอร์","฿"+fmt(n?sum(V,"a")/n:0)]];
+  const KC=["#6366f1","#10b981","#f59e0b","#ec4899","#06b6d4"];
+  $("#kpis").innerHTML=K.map((k,i)=>`<div class="card" style="border-top:4px solid ${KC[i]}"><div class="k">${k[0]}</div><div class="v" style="color:${KC[i]}">${k[1]}</div></div>`).join("");
+  let h='<tr><th>ทีม</th><th class="r">ออเดอร์</th><th class="r">คะแนน</th><th>% คะแนน</th><th class="r">ยอดขาย</th></tr>',cd="";
+  TEAMS.forEach((t,i)=>{if(HID.includes(t))return;const x=V.filter(r=>r.t==t),o=x.length,p=sum(x,"s"),pc=o?Math.min(100,p/o*100):0,c=COL[i%COL.length];
+    h+=`<tr><td><span class="dot" style="background:${c}"></span>${t}</td><td class="r">${o}</td><td class="r"><b>${fmt(p)}</b>/${o}</td><td><div class="pb"><i style="width:${pc}%;background:${c}"></i></div><small>${Math.round(pc)}%</small></td><td class="r">฿${fmt(sum(x,"a"))}</td></tr>`;
+    cd+=`<div class="tc"><div class="th" style="background:linear-gradient(135deg,${c},${c}aa)">${t}<button class="hx" data-t="${esc(t)}" title="ซ่อนทีมนี้">×</button></div><div class="tb"><div class="big" style="color:${c}">${fmt(p)}<small> / ${o}</small></div><div class="pb"><i style="width:${pc}%;background:linear-gradient(90deg,${c},${c}88)"></i></div><div class="sub">${Math.round(pc)}% · ฿${fmt(sum(x,"a"))}</div></div></div>`});
+  $("#tt").innerHTML=h;$("#tg").innerHTML=cd;
+  const hn=HID.filter(t=>TEAMS.includes(t)).length;
+  $("#hv").innerHTML=hn?`· ซ่อนอยู่ ${hn} ทีม <a href="#" id="hs">แสดงทั้งหมด</a>`:"";
+  const m={};V.forEach(r=>{(m[r.g]=m[r.g]||{a:0,o:0});m[r.g].a+=r.a;m[r.g].o++});
+  $("#ag").innerHTML=Object.entries(m).sort((a,b)=>b[1].a-a[1].a).slice(0,8).map(([g,v])=>`<div class="ag"><span>${esc(g)} <small class="sub">${v.o} ออเดอร์</small></span><b>฿${fmt(v.a)}</b></div>`).join("")||'<div class="sub">ไม่มีข้อมูล</div>';
+  chart();
+}
+function chart(){
+  const B=view(true).filter(vis),D=[...new Set(B.map(r=>r.d))].sort();
+  if(!D.length){$("#ch").innerHTML='<div class="sub">ไม่มีข้อมูล</div>';$("#lg").innerHTML="";return}
+  const ts=TEAMS.map((t,i)=>[t,i]).filter(([t])=>B.some(r=>r.t==t));
+  const ser=ts.map(([t])=>{let c=0;return D.map(d=>c+=sum(B.filter(r=>r.t==t&&r.d==d),"s"))});
+  const W=Math.max(640,D.length*ts.length*24+90),H=280,L=44,RR=16,T=22,BT=34;
+  const mx=Math.max(1,...ser.flat()),top=Math.ceil(mx/5)*5,py=v=>T+(H-T-BT)*(1-v/top);
+  const gw=(W-L-RR)/D.length,bw=Math.min(46,gw*.8/ts.length);
+  let g='<defs>'+ts.map(([t,ci],k)=>{const c=COL[ci%COL.length];return `<linearGradient id="g${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity=".55"/></linearGradient>`}).join("")+'</defs>';
+  for(let i=0;i<=5;i++){const v=top*i/5,y=py(v);g+=`<line x1="${L}" x2="${W-RR}" y1="${y}" y2="${y}" stroke="var(--bd)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" style="fill:var(--mu)">${Math.round(v)}</text>`}
+  D.forEach((d,i)=>{
+    const x0=L+i*gw+(gw-bw*ts.length)/2;
+    g+=`<text x="${L+i*gw+gw/2}" y="${H-12}" text-anchor="middle" font-size="12" style="fill:var(--mu)">${dth(d).slice(0,-5)}</text>`;
+    ts.forEach(([t,ci],k)=>{const v=ser[k][i],y=py(v),h=py(0)-y,x=x0+k*bw;
+      g+=`<rect x="${x+1.5}" y="${y}" width="${bw-3}" height="${Math.max(h,0)}" rx="5" fill="url(#g${k})"><title>${t}: ${v}</title></rect>`;
+      if(bw>=16)g+=`<text x="${x+bw/2}" y="${y-5}" text-anchor="middle" font-size="11" font-weight="700" style="fill:${COL[ci%COL.length]}">${v}</text>`})});
+  $("#ch").style.overflowX="auto";
+  $("#ch").innerHTML=`<svg class="ct" viewBox="0 0 ${W} ${H}" style="min-width:${W>640?W:0}px">${g}</svg>`;
+  $("#lg").innerHTML=ts.map(([t,ci],k)=>`<span><span class="dot" style="background:${COL[ci%COL.length]}"></span>${t} <b>${ser[k][ser[k].length-1]}</b></span>`).join("");
+}
+function ord(){
+  const V=view();
+  let h='<tr><th>วันที่</th><th>ทีม</th><th>รหัสสั่งซื้อ</th><th>ชื่อลูกค้า</th><th>ตัวแทนขาย</th><th>ยอดชำระ</th><th>พูดอัพเซล</th><th>คะแนน</th><th>หมายเหตุ</th><th></th></tr>';
+  V.forEach(r=>{h+=`<tr data-id="${r.id}" class="u${r.u}">
+  <td><input type="date" data-k="d" value="${r.d}"></td>
+  <td><select data-k="t" style="min-width:150px;font-weight:700;color:${COL[Math.max(0,TEAMS.indexOf(r.t))%COL.length]}">${TEAMS.map(t=>`<option${t==r.t?" selected":""}>${t}</option>`).join("")}</select></td>
+  <td><input data-k="c" value="${esc(r.c)}" style="min-width:175px"></td>
+  <td><input data-k="n" value="${esc(r.n)}" style="min-width:200px"></td>
+  <td><input data-k="g" value="${esc(r.g)}" style="min-width:130px"></td>
+  <td><input type="number" data-k="a" value="${r.a}" style="width:100px"></td>
+  <td><select data-k="u" style="min-width:95px"><option value="1"${r.u?" selected":""}>พูด</option><option value="0"${r.u?"":" selected"}>ไม่พูด</option></select></td>
+  <td><input type="number" step="any" data-k="s" value="${r.s}" style="width:70px;font-weight:700"></td>
+  <td><input data-k="m" value="${esc(r.m)}" placeholder="หมายเหตุ" style="min-width:200px"></td>
+  <td><button class="x" title="ลบ">🗑</button></td></tr>`});
+  $("#ot").innerHTML=h;
+}
+$("#tg").addEventListener("click",e=>{const b=e.target.closest(".hx");if(!b)return;HID.push(b.dataset.t);saveH();dash()});
+$("#hv").addEventListener("click",e=>{if(e.target.id=="hs"){e.preventDefault();HID=[];saveH();dash()}});
+$("#ot").addEventListener("change",e=>{
+  const tr=e.target.closest("tr[data-id]"),k=e.target.dataset.k;if(!tr||!k)return;
+  const r=R.find(x=>x.id==tr.dataset.id);r[k]=(k=="a"||k=="u"||k=="s")?(+e.target.value||0):e.target.value;
+  if(k=="t")e.target.style.color=COL[TEAMS.indexOf(r.t)%COL.length];
+  if(k=="u"){r.s=r.u;tr.className="u"+r.u;tr.querySelector('[data-k="s"]').value=r.s}
+  save();dash();
+});
+$("#ot").addEventListener("click",e=>{
+  if(!e.target.classList.contains("x"))return;
+  if(confirm("ลบออเดอร์นี้?")){R=R.filter(x=>x.id!=e.target.closest("tr").dataset.id);save();all()}
+});
+$("#add").onclick=()=>{const d=$("#fd").value!="all"?$("#fd").value:(R[0]?R[0].d:new Date().toISOString().slice(0,10));
+  R.unshift({id:Date.now(),d,t:$("#ft").value!="all"?$("#ft").value:TEAMS[0],c:"SO",n:"",g:"hf0015_",a:0,u:0,s:0,m:""});save();all()};
+$("#rst").onclick=()=>{if(confirm("คืนค่าข้อมูลเริ่มต้น? การแก้ไขทั้งหมดจะหาย")){R=seed();save();all()}};
+$("#csv").onclick=()=>{const L=["วันที่,ทีม,รหัสสั่งซื้อ,ชื่อลูกค้า,ตัวแทนขาย,ยอดชำระ,พูดอัพเซล,คะแนน,หมายเหตุ"].concat(R.map(r=>[dth(r.d),r.t,r.c,r.n,r.g,r.a,r.u?"พูด":"ไม่พูด",r.s,r.m].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+L.join("\n")],{type:"text/csv"}));a.download="upsell-crm.csv";a.click()};
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x==b));
+  $("#dash").classList.toggle("hide",b.dataset.t!="dash");$("#ord").classList.toggle("hide",b.dataset.t!="ord")});
+["#fd","#ft"].forEach(s=>$(s).onchange=all);$("#fq").oninput=all;
+const ISO=v=>{if(v instanceof Date)return new Date(v.getTime()+432e5).toISOString().slice(0,10);
+  const s=String(v||"").trim();let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m){let y=+m[3];if(y>2400)y-=543;return y+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0")}
+  m=s.match(/^\d{4}-\d{2}-\d{2}/);return m?m[0]:""};
+const UP=v=>{const s=String(v==null?"":v).trim();return s.includes("ไม่")?0:(s.includes("พูด")||/^(1|true|yes)$/i.test(s))?1:0};
+const NUM=v=>parseFloat(String(v==null?"":v).replace(/,/g,""))||0;
+const TN=t=>{t=String(t||"").trim();return t==="ลุกพระเจ้าตาก"?"ลูกพระเจ้าตาก":t};
+const S=v=>String(v==null?"":v).trim();
+function parse(rows){
+  const out=[];let H=null;
+  rows.forEach(a=>{
+    const m=S(a[0]).match(/^(SO\d{6}-\d{6})(\d{2}\/\d{2}\/\d{4})/);
+    if(m){out.push({d:ISO(m[2]),c:m[1],n:S(a[1]).split("เบอร์โทรศัพท์")[0].trim(),g:S(a[2]),a:NUM(a[6]||a[4]),u:UP(a[8]),t:TN(a[10]),s:UP(a[8]),m:S(a[11])});return}
+    if(S(a[0])==="วันที่"){H={};a.forEach((x,i)=>H[S(x)]=i);return}
+    if(H){const g=k=>a[H[k]];out.push({d:ISO(g("วันที่")),t:TN(g("ทีม")),c:S(g("รหัสสั่งซื้อ")),n:S(g("ชื่อลูกค้า")),g:S(g("ตัวแทนขาย")),a:NUM(g("ยอดชำระ")),u:UP(g("พูดอัพเซล")),s:H["คะแนน"]!=null?NUM(g("คะแนน")):UP(g("พูดอัพเซล")),m:S(g("หมายเหตุ"))})}
+  });
+  return out}
+function importFile(f){
+  if(!f)return;const csv=/\.csv$/i.test(f.name),rd=new FileReader();
+  rd.onerror=()=>alert("อ่านไฟล์ไม่สำเร็จ");
+  rd.onload=e=>{try{
+    const wb=XLSX.read(e.target.result,csv?{type:"string",raw:true}:{type:"array",cellDates:true});
+    let out=[];wb.SheetNames.forEach(n=>{out=out.concat(parse(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:""})))});
+    const have=new Set(R.map(r=>r.c)),day=R[0]?R[0].d:new Date().toISOString().slice(0,10);let add=0,dup=0;
+    out.forEach((r,i)=>{if(!r.n&&!r.c)return;if(r.c&&have.has(r.c)){dup++;return}have.add(r.c);
+      R.push({id:Date.now()+i,d:r.d||day,t:r.t||TEAMS[0],c:r.c,n:r.n,g:r.g,a:r.a,u:r.u,s:r.s,m:r.m});add++});
+    syncTeams();save();all();
+    alert(add?`นำเข้าสำเร็จ ${add} ออเดอร์`+(dup?` (ข้ามรหัสซ้ำ ${dup})`:""):"ไม่พบออเดอร์ใหม่ในไฟล์ (รูปแบบไม่ตรง หรือรหัสซ้ำทั้งหมด)")
+  }catch(err){alert("นำเข้าไม่สำเร็จ: "+err.message)}};
+  csv?rd.readAsText(f,"utf-8"):rd.readAsArrayBuffer(f)}
+$("#up").onclick=()=>$("#file").click();
+$("#file").onchange=e=>{importFile(e.target.files[0]);e.target.value=""};
+const oz=$("#ord");oz.addEventListener("dragover",e=>e.preventDefault());
+oz.addEventListener("drop",e=>{e.preventDefault();importFile(e.dataTransfer.files[0])});
+function all(){filters();dash();ord()}
+all();
+</script>
+</body>
+</html>
